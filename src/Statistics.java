@@ -1,5 +1,9 @@
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class Statistics {
 
@@ -11,6 +15,9 @@ public class Statistics {
 
     private int googleBotCount = 0;
     private int yandexBotCount = 0;
+
+    private Set<String> pages = new HashSet<>();
+    private Map<String, Integer> osCounts = new HashMap<>();
 
     public void addEntry(LogEntry entry) {
         totalRequests++;
@@ -24,6 +31,12 @@ public class Statistics {
             maxTime = time;
         }
 
+        if (entry.getResponseCode() == 200) {
+            pages.add((entry.getRequestPath()));
+        }
+        String osType = entry.getUserAgent().getOsType();
+        osCounts.put(osType, osCounts.getOrDefault(osType, 0) + 1);
+
         String agentName = entry.getUserAgent().getBrowserType();
 
         if (agentName.equalsIgnoreCase("Googlebot")) {
@@ -31,6 +44,21 @@ public class Statistics {
         } else if (agentName.equalsIgnoreCase("YandexBot")) {
             yandexBotCount++;
         }
+    }
+
+    public Set<String> getAllPages() {
+        return new HashSet<>(pages);
+    }
+
+    public Map<String, Double> getOsStatistics() {
+        Map<String, Double> osMap = new HashMap<>();
+        int totalOsCount = osCounts.values().stream().mapToInt(Integer::intValue).sum();
+
+        for (Map.Entry<String, Integer> entry : osCounts.entrySet()) {
+            double osPercent = (double) entry.getValue() /  totalOsCount;
+            osMap.put(entry.getKey(), osPercent);
+        }
+        return osMap;
     }
 
     public double getTrafficRate() {
@@ -60,11 +88,11 @@ public class Statistics {
         return totalRequests;
     }
 
-    public double getGooglebotRatio() {
+    public double getGoogleBotRatio() {
         return totalRequests > 0 ? (double) googleBotCount / totalRequests : 0;
     }
 
-    public double getYandexbotRatio() {
+    public double getYandexBotRatio() {
         return totalRequests > 0 ? (double) yandexBotCount / totalRequests : 0;
     }
 }

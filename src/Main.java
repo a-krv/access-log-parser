@@ -1,5 +1,7 @@
 import java.io.*;
+import java.util.Map;
 import java.util.Scanner;
+import java.util.Set;
 
 public class Main {
 
@@ -52,8 +54,21 @@ public class Main {
                 System.out.println("GoogleBot запросов: " + statistics.getGoogleBotCount());
                 System.out.println("YandexBot запросов: " + statistics.getYandexBotCount());
 
-                System.out.printf("Доля запросов с GoogleBot: %.2f%%\n", statistics.getGooglebotRatio() * 100);
-                System.out.printf("Доля запросов с YandexBot: %.2f%%\n", statistics.getYandexbotRatio() * 100);
+                System.out.printf("Доля запросов с GoogleBot: %.2f%%\n", statistics.getGoogleBotRatio() * 100);
+                System.out.printf("Доля запросов с YandexBot: %.2f%%\n", statistics.getYandexBotRatio() * 100);
+                System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+
+                Set<String> pages = statistics.getAllPages();
+                System.out.println("Уникальные страницы сайта c кодом 200:");
+                for (String page : pages) {
+                    System.out.println(page);
+                }
+
+                Map<String, Double> osStats = statistics.getOsStatistics();
+                System.out.println("Статистика операционных систем:");
+                for (Map.Entry<String, Double> entry : osStats.entrySet()) {
+                    System.out.printf("%s: %.2f%%\n", entry.getKey(), entry.getValue() * 100);
+                }
                 break;
 
             } catch (FileNotFoundException e) {
