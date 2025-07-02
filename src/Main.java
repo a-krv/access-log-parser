@@ -1,13 +1,7 @@
-import java.awt.*;
 import java.io.*;
 import java.util.Scanner;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class Main {
-
-    static int googleBotCounter = 0;
-    static int yandexBotCounter = 0;
 
     public static void main(String[] args) {
         int fileCounter = 0;
@@ -30,6 +24,7 @@ public class Main {
             }
 
             int lineCounter = 0;
+            Statistics statistics = new Statistics();
 
             try {
                 FileReader fileReader = new FileReader(path);
@@ -38,20 +33,28 @@ public class Main {
                 String line;
 
 
-
-
                 while ((line = reader.readLine()) != null) {
-                    int lenght = line.length();
+                    int length = line.length();
                     lineCounter++;
 
-                    if (lenght > 1024) {
-                        throw new LongLineException("В файле найдена строка длиной: " + lenght + " символов. Это больше допустимой длины в 1024 символа!");
+                    if (length > 1024) {
+                        throw new LongLineException("В файле найдена строка длиной: " + length + " символов. Это больше допустимой длины в 1024 символа!");
                     }
 
-                    parseLog(line);
+                    LogEntry entry = new LogEntry(line);
+                    statistics.addEntry(entry);
 
                 }
                 reader.close();
+
+                System.out.println("Общее количество запросов: " + statistics.getTotalRequests());
+                System.out.printf("Средний объем трафика за час: %.2f МБ\n", (double) statistics.getTrafficRate() / (1024 * 1024));
+                System.out.println("GoogleBot запросов: " + statistics.getGoogleBotCount());
+                System.out.println("YandexBot запросов: " + statistics.getYandexBotCount());
+
+                System.out.printf("Доля запросов с GoogleBot: %.2f%%\n", statistics.getGooglebotRatio() * 100);
+                System.out.printf("Доля запросов с YandexBot: %.2f%%\n", statistics.getYandexbotRatio() * 100);
+                break;
 
             } catch (FileNotFoundException e) {
                 System.out.println("Файл не найден.");
@@ -60,61 +63,6 @@ public class Main {
             } catch (LongLineException e) {
                 System.out.println("Ошибка:" + e.getMessage());
                 break;
-            }
-            System.out.println("Всего строк: " + lineCounter);
-            System.out.println("Количество строк с GoogleBot: " + googleBotCounter);
-            System.out.println("Количество строк с YandexBot: " + yandexBotCounter);
-
-            if (lineCounter > 0) {
-                double googleBotPercent = (double) googleBotCounter / lineCounter * 100;
-                double yandexBotPercent = (double) yandexBotCounter / lineCounter * 100;
-
-                System.out.printf("Доля запросов с GoogleBot: %.2f%%\n", googleBotPercent);
-                System.out.printf("Доля запросов с YandexBot: %.2f%%\n", yandexBotPercent);
-                break;
-
-            } else {
-                System.out.println("Файл пустой!");
-            }
-        }
-    }
-
-    static void parseLog(String line) {
-        String[] parts = line.split("\"");
-
-        if (parts.length < 6) {
-            return;
-        }
-
-        String userAgent = parts[5];
-
-        int open = userAgent.indexOf("(");
-        int close = userAgent.indexOf(")");
-
-        if (open != -1 && close != -1 && close > open) {
-            String firstBracket = userAgent.substring(open + 1, close);
-
-            String[] fragments = firstBracket.split(";");
-            for (int i = 0; i < fragments.length; i++) {
-                fragments[i] = fragments[i].trim();
-            }
-
-            if (fragments.length >= 2) {
-                String secondFragment = fragments[1];
-                int slashIndex = secondFragment.indexOf("/");
-                String programName;
-
-                if (slashIndex != -1) {
-                    programName = secondFragment.substring(0, slashIndex).trim();
-                } else {
-                    programName = secondFragment.trim();
-                }
-
-                if (programName.equals("Googlebot")) {
-                    googleBotCounter++;
-                } else if (programName.equals("YandexBot")) {
-                    yandexBotCounter++;
-                }
             }
         }
     }
