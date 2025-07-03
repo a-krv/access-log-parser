@@ -17,7 +17,11 @@ public class Statistics {
     private int yandexBotCount = 0;
 
     private Set<String> pages = new HashSet<>();
+    private Set<String> notExistingPages = new HashSet<>();
+
     private Map<String, Integer> osCounts = new HashMap<>();
+    private Map<String, Integer> browserCounts = new HashMap<>();
+
 
     public void addEntry(LogEntry entry) {
         totalRequests++;
@@ -33,21 +37,32 @@ public class Statistics {
 
         if (entry.getResponseCode() == 200) {
             pages.add((entry.getRequestPath()));
+        } else if (entry.getResponseCode() == 404) {
+            notExistingPages.add(entry.getRequestPath());
         }
+
         String osType = entry.getUserAgent().getOsType();
         osCounts.put(osType, osCounts.getOrDefault(osType, 0) + 1);
 
-        String agentName = entry.getUserAgent().getBrowserType();
 
-        if (agentName.equalsIgnoreCase("Googlebot")) {
+        String browserType = entry.getUserAgent().getBrowserType();
+        browserCounts.put(browserType, browserCounts.getOrDefault(browserType, 0) + 1);
+
+
+        if (browserType.equalsIgnoreCase("Googlebot")) {
             googleBotCount++;
-        } else if (agentName.equalsIgnoreCase("YandexBot")) {
+        } else if (browserType.equalsIgnoreCase("YandexBot")) {
             yandexBotCount++;
         }
     }
 
+
     public Set<String> getAllPages() {
         return new HashSet<>(pages);
+    }
+
+    public Set<String> getAllNotExistingPages() {
+        return new HashSet<>(notExistingPages);
     }
 
     public Map<String, Double> getOsStatistics() {
@@ -55,10 +70,21 @@ public class Statistics {
         int totalOsCount = osCounts.values().stream().mapToInt(Integer::intValue).sum();
 
         for (Map.Entry<String, Integer> entry : osCounts.entrySet()) {
-            double osPercent = (double) entry.getValue() /  totalOsCount;
+            double osPercent = (double) entry.getValue() / totalOsCount;
             osMap.put(entry.getKey(), osPercent);
         }
         return osMap;
+    }
+
+    public Map<String, Double> getBrowserStatistics() {
+        Map<String, Double> browserMap = new HashMap<>();
+        int totalBrowserCount = browserCounts.values().stream().mapToInt(Integer::intValue).sum();
+
+        for (Map.Entry<String, Integer> entry : browserCounts.entrySet()) {
+            double browserPercent = (double) entry.getValue() / totalBrowserCount;
+            browserMap.put(entry.getKey(), browserPercent);
+        }
+        return browserMap;
     }
 
     public double getTrafficRate() {

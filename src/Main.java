@@ -58,17 +58,30 @@ public class Main {
                 System.out.printf("Доля запросов с YandexBot: %.2f%%\n", statistics.getYandexBotRatio() * 100);
                 System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 
-                Set<String> pages = statistics.getAllPages();
-                System.out.println("Уникальные страницы сайта c кодом 200:");
-                for (String page : pages) {
-                    System.out.println(page);
-                }
-
                 Map<String, Double> osStats = statistics.getOsStatistics();
                 System.out.println("Статистика операционных систем:");
                 for (Map.Entry<String, Double> entry : osStats.entrySet()) {
                     System.out.printf("%s: %.2f%%\n", entry.getKey(), entry.getValue() * 100);
                 }
+
+                Map<String, Double> browserStats = statistics.getBrowserStatistics();
+                System.out.println("Статистика браузеров:");
+                for (Map.Entry<String, Double> entry : browserStats.entrySet()) {
+                    System.out.printf("%s: %.2f%%\n", entry.getKey(), entry.getValue() * 100);
+                }
+
+                Set<String> notExistingPages = statistics.getAllNotExistingPages();
+                System.out.println("Несуществующие страницы c кодом 404:");
+                for (String page : notExistingPages) {
+                    System.out.println(page);
+                }
+
+//                Set<String> pages = statistics.getAllPages();
+//                System.out.println("Уникальные страницы сайта c кодом 200:");
+//                for (String page : pages) {
+//                    System.out.println(page);
+//                }
+
                 break;
 
             } catch (FileNotFoundException e) {
