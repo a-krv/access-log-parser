@@ -74,6 +74,20 @@ public class Main {
                 }
                 System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 
+                int peakVisits = statistics.getPeakVisitsPerSecond();
+                System.out.println("Пиковая посещаемость (не боты) в секунду: " + peakVisits);
+
+                int maxVisitsByUser = statistics.getMaxVisitsBySingleUser();
+                System.out.println("Максимальное количество посещений одним пользователем (не ботом): " + maxVisitsByUser);
+
+                Set<String> refererDomains = statistics.getRefererDomains();
+                System.out.println("Сайты, с которых был выполнен переход: ");
+                for (String domain : refererDomains) {
+                    System.out.println(domain);
+                }
+
+
+
 //                Set<String> notExistingPages = statistics.getAllNotExistingPages();
 //                System.out.println("Несуществующие страницы c кодом 404:");
 //                for (String page : notExistingPages) {
