@@ -1,3 +1,5 @@
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
@@ -29,6 +31,9 @@ public class Statistics {
     private Map<String, Integer> osCounts = new HashMap<>();
     private Map<String, Integer> browserCounts = new HashMap<>();
 
+    private Map<Integer, Integer> secondCounts = new HashMap<>();
+    private Set<String> refererDomains = new HashSet<>();
+    private Map<String, Integer> realUserVisitsPerIp = new HashMap<>();
 
     public void addEntry(LogEntry entry) {
         totalRequests++;
@@ -70,7 +75,40 @@ public class Statistics {
             normalUserRequests++;
             realUserRequests++;
             uniqueRealUserIps.add(entry.getIpAddress());
+
+            int secondKey = time.getHour() * 3600 + time.getMinute() * 60 + time.getSecond();
+            secondCounts.put(secondKey, secondCounts.getOrDefault(secondKey, 0) + 1);
+
+            realUserVisitsPerIp.put(entry.getIpAddress(), realUserVisitsPerIp.getOrDefault(entry.getIpAddress(), 0) + 1);
         }
+        String referer = entry.getReferer();
+        if (referer != null && !referer.equals("-") && !referer.isEmpty()) {
+            String domain = extractDomain(referer);
+            if (domain != null && !domain.isEmpty()) {
+                refererDomains.add(domain);
+            }
+        }
+    }
+
+    private String extractDomain (String urlStr) {
+        try {
+            URL url = new URL(urlStr);
+            return url.getHost();
+        } catch (MalformedURLException e) {
+            return null;
+        }
+    }
+
+    public int getPeakVisitsPerSecond() {
+        return secondCounts.values().stream().max(Integer::compareTo).orElse(0);
+    }
+
+    public Set<String> getRefererDomains() {
+        return new HashSet<>(refererDomains);
+    }
+
+    public int getMaxVisitsBySingleUser() {
+        return realUserVisitsPerIp.values().stream().max(Integer::compareTo).orElse(0);
     }
 
     public Set<String> getAllPages() {
