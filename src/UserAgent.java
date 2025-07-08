@@ -1,10 +1,12 @@
 public class UserAgent {
     private final String osType;
     private final String browserType;
+    private final String userAgentString;
 
     public UserAgent(String userAgentStr) {
         this.osType = detectOs(userAgentStr);
         this.browserType = detectBrowser(userAgentStr);
+        this.userAgentString = userAgentStr;
     }
 
     private String detectOs(String userAgent) {
@@ -41,12 +43,20 @@ public class UserAgent {
         }
     }
 
+    public boolean isBot() {
+        return userAgentString.toLowerCase().contains("bot");
+    }
+
     public String getOsType() {
         return osType;
     }
 
     public String getBrowserType() {
         return browserType;
+    }
+
+    public String getUserAgentString() {
+        return userAgentString;
     }
 
     @Override
