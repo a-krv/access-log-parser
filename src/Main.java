@@ -51,6 +51,9 @@ public class Main {
 
                 System.out.println("Общее количество запросов: " + statistics.getTotalRequests());
                 System.out.printf("Средний объем трафика за час: %.2f МБ\n", (double) statistics.getTrafficRate() / (1024 * 1024));
+                System.out.printf("Среднее число посещений в час: %.2f%n", statistics.getAverageVisitsPerHour());
+                System.out.printf("Среднее число ошибок в час: %.2f%n", statistics.getAverageErrorsPerHour());
+                System.out.printf("Среднее число посещений одним пользователем (не ботом): %.2f%n", statistics.getAverageVisitsPerRealUser());
                 System.out.println("GoogleBot запросов: " + statistics.getGoogleBotCount());
                 System.out.println("YandexBot запросов: " + statistics.getYandexBotCount());
 
@@ -69,12 +72,13 @@ public class Main {
                 for (Map.Entry<String, Double> entry : browserStats.entrySet()) {
                     System.out.printf("%s: %.2f%%\n", entry.getKey(), entry.getValue() * 100);
                 }
+                System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 
-                Set<String> notExistingPages = statistics.getAllNotExistingPages();
-                System.out.println("Несуществующие страницы c кодом 404:");
-                for (String page : notExistingPages) {
-                    System.out.println(page);
-                }
+//                Set<String> notExistingPages = statistics.getAllNotExistingPages();
+//                System.out.println("Несуществующие страницы c кодом 404:");
+//                for (String page : notExistingPages) {
+//                    System.out.println(page);
+//                }
 
 //                Set<String> pages = statistics.getAllPages();
 //                System.out.println("Уникальные страницы сайта c кодом 200:");

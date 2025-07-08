@@ -16,6 +16,13 @@ public class Statistics {
     private int googleBotCount = 0;
     private int yandexBotCount = 0;
 
+    private int errorRequests = 0;
+    private int normalUserRequests = 0;
+
+    private int realUserRequests = 0;
+
+    private Set<String> uniqueRealUserIps = new HashSet<>();
+
     private Set<String> pages = new HashSet<>();
     private Set<String> notExistingPages = new HashSet<>();
 
@@ -41,6 +48,10 @@ public class Statistics {
             notExistingPages.add(entry.getRequestPath());
         }
 
+        if (entry.getResponseCode() >= 400 && entry.getResponseCode() < 600) {
+            errorRequests++;
+        }
+
         String osType = entry.getUserAgent().getOsType();
         osCounts.put(osType, osCounts.getOrDefault(osType, 0) + 1);
 
@@ -54,8 +65,13 @@ public class Statistics {
         } else if (browserType.equalsIgnoreCase("YandexBot")) {
             yandexBotCount++;
         }
-    }
 
+        if (!entry.getUserAgent().isBot()) {
+            normalUserRequests++;
+            realUserRequests++;
+            uniqueRealUserIps.add(entry.getIpAddress());
+        }
+    }
 
     public Set<String> getAllPages() {
         return new HashSet<>(pages);
@@ -87,19 +103,44 @@ public class Statistics {
         return browserMap;
     }
 
-    public double getTrafficRate() {
+    private double getPeriodInHours() {
         if (minTime == null || maxTime == null || minTime.equals(maxTime)) {
             return 0.0;
         }
         long seconds = ChronoUnit.SECONDS.between(minTime, maxTime);
 
-        if (seconds == 0) {
-            return totalTraffic;
+        return seconds / 3600.0;
+    }
+
+    public double getTrafficRate() {
+        double hours = getPeriodInHours();
+        if (hours == 0) {
+            return 0.0;
         }
-
-        double hours = seconds / 3600.0;
-
         return (double) totalTraffic / hours;
+    }
+
+    public double getAverageVisitsPerHour() {
+        double hours = getPeriodInHours();
+        if (hours == 0) {
+            return 0.0;
+        }
+        return (double) normalUserRequests / hours;
+    }
+
+    public double getAverageErrorsPerHour() {
+        double hours = getPeriodInHours();
+        if (hours == 0) {
+            return 0.0;
+        }
+        return (double) errorRequests / hours;
+    }
+
+    public double getAverageVisitsPerRealUser() {
+        if (uniqueRealUserIps.isEmpty()) {
+            return 0.0;
+        }
+        return (double) realUserRequests / uniqueRealUserIps.size();
     }
 
     public int getGoogleBotCount() {
